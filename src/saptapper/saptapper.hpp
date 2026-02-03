@@ -30,7 +30,7 @@ class Saptapper {
                       MinigsfDriverParam& minigsf, agbptr_t& gsf_driver_addr,
                       bool throw_if_missing = false);
 
-  static void PrintParam(const Mp2kDriverParam& param,
+  static void PrintParam(const Cartridge& cartridge, const Mp2kDriverParam& param,
                          const MinigsfDriverParam& minigsf);
 
  private:

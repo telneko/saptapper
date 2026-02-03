@@ -101,8 +101,13 @@ void Saptapper::Inspect(const Cartridge& cartridge, Mp2kDriverParam& param,
   minigsf.set_size(GetMinigsfSize(param.song_count()));
 }
 
-void Saptapper::PrintParam(const Mp2kDriverParam& param,
+void Saptapper::PrintParam(const Cartridge& cartridge,
+                           const Mp2kDriverParam& param,
                            const MinigsfDriverParam& minigsf) {
+  std::cout << "Game title: " << cartridge.game_title() << std::endl;
+  std::cout << "Game code:  " << cartridge.game_code() << std::endl;
+  std::cout << std::endl;
+
   std::cout << "Status: " << (param.ok() ? "OK" : "FAILED") << std::endl
             << std::endl;
 

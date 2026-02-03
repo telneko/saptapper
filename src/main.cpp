@@ -67,13 +67,17 @@ int main(int argc, const char** argv) {
       MinigsfDriverParam minigsf;
       agbptr_t gsf_driver_addr = agbnullptr;
       Saptapper::Inspect(cartridge, param, minigsf, gsf_driver_addr);
-      Saptapper::PrintParam(param, minigsf);
+      Saptapper::PrintParam(cartridge, param, minigsf);
     } else {
+      std::string default_name = cartridge.game_title();
+      if (default_name.empty()) default_name = in_path.stem().string();
+
       const std::filesystem::path basename{
-          basename_arg ? args::get(basename_arg) : in_path.stem()};
+          basename_arg ? args::get(basename_arg)
+                       : std::filesystem::path{default_name}};
       const std::filesystem::path outdir{
           outdir_arg ? args::get(outdir_arg)
-                     : in_path.parent_path() / in_path.stem()};
+                     : in_path.parent_path() / default_name};
 
       std::string gsfby{args::get(gsfby_arg)};
       if (gsfby != "Caitsith2") {
