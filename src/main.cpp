@@ -71,7 +71,9 @@ int main(int argc, const char** argv) {
     } else {
       const std::filesystem::path basename{
           basename_arg ? args::get(basename_arg) : in_path.stem()};
-      const std::filesystem::path outdir{args::get(outdir_arg)};
+      const std::filesystem::path outdir{
+          outdir_arg ? args::get(outdir_arg)
+                     : in_path.parent_path() / in_path.stem()};
 
       std::string gsfby{args::get(gsfby_arg)};
       if (gsfby != "Caitsith2") {
