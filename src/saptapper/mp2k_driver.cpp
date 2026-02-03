@@ -75,12 +75,33 @@ agbptr_t Mp2kDriver::FindInitFn(std::string_view rom, agbptr_t main_fn) {
   if (main_fn == agbnullptr) return agbnullptr;
 
   using namespace std::literals::string_view_literals;
-  std::array patterns = {
-      "\x70\xb5\x14\x48"sv,  // push {r4-r6,lr}; ldr r0, =(SoundMainRAM+1)
-      "\xf0\xb5\x47\x46"sv,  // push {r4-r7,lr}; mov r7, r8
-  };
-  return find_backwards(rom, patterns, to_offset(main_fn), 0x100);
-}  // namespace saptapper
+
+  // Pattern 1: push {r4-r6,lr}; ldr r0, [pc, #imm]; followed by alignment code
+  // The immediate offset (3rd byte) of ldr r0, [pc, #imm] varies by ROM layout, so mask it
+  const BytePattern pattern1{
+      "\x70\xb5\x00\x48\x02\x21\x49\x42\x08\x40"sv,
+      "xx?xxxxxxx"sv};
+
+  // Pattern 2: push {r4-r7,lr}; mov r7, r8
+  const BytePattern pattern2{"\xf0\xb5\x47\x46"sv};
+
+  const agbsize_t main_fn_pos = to_offset(main_fn);
+  if (main_fn_pos >= rom.size()) return agbnullptr;
+
+  constexpr agbsize_t length = 0x100;
+  constexpr agbsize_t align = 4;
+  if (length < align || rom.size() < length) return agbnullptr;
+  if (main_fn_pos < length) return agbnullptr;
+
+  const agbsize_t max_pos = main_fn_pos - align;
+  const agbsize_t min_pos = main_fn_pos - length;
+
+  for (agbsize_t offset = max_pos; offset >= min_pos; offset -= align) {
+    if (pattern1.Match(rom, offset) || pattern2.Match(rom, offset))
+      return to_romptr(offset);
+  }
+  return agbnullptr;
+}
 
 agbptr_t Mp2kDriver::FindMainFn(std::string_view rom, agbptr_t select_song_fn) {
   if (select_song_fn == agbnullptr) return agbnullptr;
